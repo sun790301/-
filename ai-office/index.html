@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Office</title>
+<link rel="stylesheet" href="style.css" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+    "@anthropic-ai/sdk": "https://esm.sh/@anthropic-ai/sdk@1.8.0"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <section id="stage">
+    <div id="scene"></div>
+
+    <div class="hud hud-left">
+      <div class="pill" title="完成任務數"><span class="ico">⚡</span><b id="hud-tasks">0</b></div>
+      <div class="pill" title="累計花費 (US$)"><span class="ico">☆</span><b id="hud-cost">0.000</b></div>
+      <div class="pill" title="上班狀態"><span class="ico">🕒</span><span id="hud-shift">上班中</span></div>
+    </div>
+
+    <div class="hud hud-right">
+      <button class="tool" id="btn-cam" title="重設視角">🏠</button>
+      <button class="tool" id="btn-light" title="切換白天/夜晚">🌙</button>
+      <button class="tool" id="btn-labels" title="顯示/隱藏名牌">👁</button>
+      <button class="tool" id="btn-settings" title="設定">⚙️</button>
+      <button class="tool" id="btn-panel" title="收合側欄">▮</button>
+    </div>
+
+    <div id="legend">
+      <span><i class="dot idle"></i>閒置</span>
+      <span><i class="dot working"></i>工作中</span>
+      <span><i class="dot thinking"></i>思考中</span>
+      <span><i class="dot chatting"></i>聊天中</span>
+    </div>
+  </section>
+
+  <aside id="panel">
+    <nav class="tabs">
+      <button class="tab active" data-tab="boss">主管</button>
+      <button class="tab" data-tab="team">小組</button>
+    </nav>
+
+    <div class="tabview active" id="tab-boss">
+      <div id="chat"></div>
+      <form id="composer">
+        <textarea id="input" rows="1" placeholder="交代工作給主管…"></textarea>
+        <button type="submit" id="send" title="送出">↑</button>
+      </form>
+      <div class="composer-foot">
+        <span id="mode-label"></span>
+        <button class="link" id="btn-clear">清除對話</button>
+      </div>
+    </div>
+
+    <div class="tabview" id="tab-team">
+      <div class="team-head">
+        <h3>團隊成員</h3>
+        <button class="btn small" id="btn-hire">＋ 招募</button>
+      </div>
+      <div id="roster"></div>
+      <div class="team-head"><h3>茶水間閒聊</h3></div>
+      <div id="chatter"></div>
+    </div>
+  </aside>
+</div>
+
+<dialog id="dlg-settings">
+  <form method="dialog" class="dlg">
+    <h3>設定</h3>
+    <label>專案名稱<input id="set-project" type="text" /></label>
+    <label>Anthropic API Key
+      <input id="set-key" type="password" placeholder="sk-ant-…（留空＝示範模式）" autocomplete="off" />
+      <small>金鑰只存在你這台瀏覽器的 localStorage，請求直接從瀏覽器送到 Anthropic API。請勿在公用電腦使用。</small>
+    </label>
+    <label>模型
+      <select id="set-model">
+        <option value="claude-opus-5-5">Claude Opus 5.5（預設）</option>
+        <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
+        <option value="claude-haiku-5-5">Claude Haiku 5.5</option>
+        <option value="claude-fable-5-2">Claude Fable 5.2</option>
+      </select>
+    </label>
+    <label class="row"><input id="set-chatter" type="checkbox" /> 閒置時員工會互相聊天（使用 API 時會產生少量費用）</label>
+    <div class="dlg-actions">
+      <button value="cancel" class="btn ghost">取消</button>
+      <button value="ok" id="set-save" class="btn">儲存</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-member">
+  <form method="dialog" class="dlg">
+    <h3 id="member-title">招募新成員</h3>
+    <label>名字<input id="m-name" type="text" required maxlength="8" /></label>
+    <label>職位<input id="m-role" type="text" required maxlength="20" placeholder="例如：文件專員" /></label>
+    <label>技能（用逗號分隔）<input id="m-skills" type="text" placeholder="例如：撰寫文件, 整理會議紀錄" /></label>
+    <label>個性<input id="m-persona" type="text" placeholder="例如：細心、愛喝咖啡" /></label>
+    <label>衣服顏色<input id="m-color" type="color" value="#4f8cff" /></label>
+    <div class="dlg-actions">
+      <button value="delete" id="m-delete" class="btn danger">解僱</button>
+      <span class="spacer"></span>
+      <button value="cancel" class="btn ghost">取消</button>
+      <button value="ok" class="btn">儲存</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
