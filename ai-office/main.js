@@ -405,7 +405,7 @@ function openMember(id) {
 }
 
 $('#btn-hire').onclick = () => {
-  if (state.team.employees.length >= MAX_EMPLOYEES) return alert(`辦公室最多只能坐 ${MAX_EMPLOYEES} 位員工喔！`);
+  if (state.team.employees.length >= MAX_EMPLOYEES) return toast(`辦公室最多只能坐 ${MAX_EMPLOYEES} 位員工喔！`);
   openMember(null);
 };
 
@@ -417,7 +417,7 @@ $('#dlg-member').addEventListener('close', () => {
   const role = $('#m-role').value.trim();
   if (!name || !role) return;
   const taken = [state.team.manager, ...state.team.employees].some((e) => e.name === name && e.id !== editingId);
-  if (taken) return alert('已經有同名的成員了，換個名字吧！');
+  if (taken) return toast('已經有同名的成員了，換個名字吧！');
   const data = {
     name, role,
     skills: $('#m-skills').value.split(/[,，、]/).map((s) => s.trim()).filter(Boolean),
@@ -446,13 +446,21 @@ $('#dlg-member').addEventListener('close', () => {
 
 function fire(id) {
   const m = state.team.employees.find((e) => e.id === id);
-  if (!m || !confirm(`確定要讓 ${m.name} 離開團隊嗎？`)) return;
+  if (!m) return;
   const a = agents.get(id);
   if (a) { office.removeAgent(a); agents.delete(id); }
   state.team.employees = state.team.employees.filter((e) => e.id !== id);
   recentEvents.push(`${m.name}離開了團隊`);
   save();
   renderRoster();
+}
+
+function toast(text) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = text;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
 }
 
 /* ---------------- 設定 ---------------- */
